@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from app.core.database import Base
 
 class Mcp_tool_p(Base):
+     __tablename__="mcp_tool_permissions"
      
      id = Column(Integer, primary_key=True, index=True)
 
