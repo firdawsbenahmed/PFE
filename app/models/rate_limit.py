@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy import func 
 from app.core.database import Base 
 
-class Rate_limit(Base): 
+class RateLimitCounter(Base): 
     __tablename__ = "rate_limits"
 
     id = Column(Integer, primary_key=True, index=True)
