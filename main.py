@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from app.core.database import engine
+from app.api.company import router as company_router
 
 app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"message": "DB connected"}
+app.include_router(company_router)
