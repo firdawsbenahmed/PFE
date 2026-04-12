@@ -18,7 +18,7 @@ def create_store(store : CreateStore, db : Session = Depends(get_db)):
     if not company : 
         raise HTTPException(status_code= 404 , detail="company does not exist !!")
     
-    new_store = store(
+    new_store = Store(
         name = store.name,
         location = store.location,
         company_id = store.company_id,
