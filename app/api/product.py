@@ -15,17 +15,17 @@ def create_product(product :ProductCreate, db : Session = Depends(get_db)) :
 
     #### we need to see if the company exists 
 
-    company = db.query(Company).filter(Company.id == product.company_id)
+    company = db.query(Company).filter(Company.id == product.company_id).first()
 
     if not company : 
         raise HTTPException(status_code=404, detail="Company not found")
     
     #### see if Stock Keeping Unit IS NOT already used by the company 
 
-    sku_exist = db.query(
-        product.company_id == Product.company_id,
+    sku_exist = db.query(Product).filter(
+        Product.company_id == product.company_id,
         Product.sku == product.sku
-        ).first()
+    ).first()
     if sku_exist :
         raise HTTPException(status_code=400 , detail="sku already exists for this comapny!!")
     
