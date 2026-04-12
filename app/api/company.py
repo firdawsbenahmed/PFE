@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session 
-from app.core.database import SessionLocal
+from app.core.database import get_db
 from app.models.company import Company
 from app.schemas.company import CompanyCreate, CompanyResponse
 from sqlalchemy.exc import IntegrityError
@@ -8,15 +8,6 @@ from fastapi import HTTPException
 from typing import List
 
 router = APIRouter()
-
-
-def get_db():
-    db = SessionLocal()
-
-    try : 
-        yield db
-    finally: 
-        db.close()
 
 
 @router.post("/companies", response_model= CompanyResponse)
