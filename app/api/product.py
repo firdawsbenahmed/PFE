@@ -15,7 +15,7 @@ def create_product(product :ProductCreate, db : Session = Depends(get_db)) :
 
     #### we need to see if the company exists 
 
-    company = db.query(company).filter(Company.id == product.company_id)
+    company = db.query(Company).filter(Company.id == product.company_id)
 
     if not company : 
         raise HTTPException(status_code=404, detail="Company not found")
@@ -43,5 +43,5 @@ def create_product(product :ProductCreate, db : Session = Depends(get_db)) :
 
 @router.get("/", response_model=List[ProductResponse]) 
 def get_product(db : Session = Depends(get_db)): 
-    return db.query(Product).all
+    return db.query(Product).all()
 

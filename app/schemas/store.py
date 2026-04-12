@@ -11,5 +11,5 @@ class StoreResponse(BaseModel):
     company_id : int 
     id : int
 
-    class config:
+    class Config:
         from_attributes = True   
