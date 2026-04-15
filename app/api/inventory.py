@@ -2,8 +2,8 @@ from app.models.company import Company
 from app.models.product import Product
 from app.models.Store import Store
 from app.models.inventory import Inventory
-from app.schemas.inventory import CreateInventory, ResponseInventory
-from fastapi import APIRouter, Depends, HTTPException
+from app.schemas.inventory import CreateInventory, ResponseInventory, UpdateInventoryQuantity
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List
 from sqlalchemy.orm import Session 
 from app.core.database import get_db
@@ -81,3 +81,38 @@ def get_inventory(
 
     return query.all()
 
+## since our project is multitenant we nee to use the inventory_id so each comapany only aceess its own data
+@router.put("/{inventory_id}", response_model=ResponseInventory)
+def update_inventory_quantity(
+        inventory_id: int,
+        payload: UpdateInventoryQuantity,
+        db : Session = Depends(get_db)
+):
+    inventory = db.query(Inventory).filter(Inventory.id == inventory_id).first() ## SELECT * FROM inventory WHERE company_id = 1;
+
+    if not inventory : 
+        raise HTTPException(status_code=404, detail="inventory record not found")
+    
+    inventory.quantity = payload.quantity ## we replaces the value of the inventory withh a new one 
+    db.commit()
+    db.refresh()
+    return inventory
+
+@router.delete("/{inventory_id}")
+def delete_inventory(
+    inventory_id : int,
+    db : Session = Depends(get_db)
+):
+    inventory = db.query(Inventory).filter(Inventory.id == inventory_id).first()
+
+    if not inventory : 
+        raise HTTPException(status_code=404 , detail="inventory record is not found ")
+    
+    db.delete(inventory)
+    db.refresh()
+
+    return {"Inventory record has been deleted successfully !!"}
+
+
+
+    
