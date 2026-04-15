@@ -95,7 +95,7 @@ def update_inventory_quantity(
     
     inventory.quantity = payload.quantity ## we replaces the value of the inventory withh a new one 
     db.commit()
-    db.refresh()
+    db.refresh(inventory)
     return inventory
 
 @router.delete("/{inventory_id}")
@@ -109,7 +109,8 @@ def delete_inventory(
         raise HTTPException(status_code=404 , detail="inventory record is not found ")
     
     db.delete(inventory)
-    db.refresh()
+    db.commit()
+    db.refresh(inventory)
 
     return {"Inventory record has been deleted successfully !!"}
 
