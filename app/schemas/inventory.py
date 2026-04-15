@@ -6,6 +6,9 @@ class CreateInventory(BaseModel):
     store_id : int 
     quantity: int = Field(gt=0) 
 
+class UpdateInventoryQuantity(BaseModel): 
+    quantity: int = Field(ge=0)
+
 class ResponseInventory(BaseModel): 
     id : int 
     company_id : int 
