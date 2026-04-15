@@ -33,3 +33,4 @@ def create_company(company: CompanyCreate, db: Session = Depends(get_db)):
 def get_companies (db : Session = Depends(get_db)): 
     companies = db.query(Company).all()
     return companies
+

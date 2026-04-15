@@ -9,7 +9,7 @@ from app.models.Store import Store
 
 router = APIRouter(prefix="/stores", tags=['Stores'] )
 
-@router.post("/", response_model=CreateStore)
+@router.post("/", response_model=StoreResponse)
 def create_store(store : CreateStore, db : Session = Depends(get_db)): 
 
     ## we see if the company exists 

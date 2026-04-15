@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field   
 
 class CreateInventory(BaseModel):
     company_id : int 
     product_id : int 
     store_id : int 
-    quantity : int 
+    quantity: int = Field(gt=0) 
 
 class ResponseInventory(BaseModel): 
     id : int 

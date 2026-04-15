@@ -11,7 +11,7 @@ from app.core.database import get_db
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
-@router.post("/", response_model= CreateInventory)
+@router.post("/", response_model= ResponseInventory)
 def create_inventory(item : CreateInventory, db : Session = Depends(get_db)) : 
 
     ### checking for the existance of the company 
@@ -19,7 +19,7 @@ def create_inventory(item : CreateInventory, db : Session = Depends(get_db)) :
     company = db.query(Company).filter(Company.id == item.company_id).first()
 
     if not company : 
-        raise HTTPException (status_code=404 , detail="comapany does not exist !!")
+        raise HTTPException (status_code=404 , detail="company does not exist !!")
     
     ## cheching if product exists 
 
@@ -51,7 +51,7 @@ def create_inventory(item : CreateInventory, db : Session = Depends(get_db)) :
         Inventory.product_id == item.product_id
     ).first()
     if inventory_exist : 
-        inventory_exist.quantity =+ item.quantity
+        inventory_exist.quantity += item.quantity
         db.commit()
         db.refresh(inventory_exist)
         return inventory_exist 
