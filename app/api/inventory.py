@@ -71,5 +71,13 @@ def create_inventory(item : CreateInventory, db : Session = Depends(get_db)) :
     return new_inventory 
 
 @router.get("/",response_model=List[ResponseInventory])
-def get_inventory(db : Session = Depends(get_db)) : 
-    return db.query(Inventory).all()
+def get_inventory(
+    comapny_id: int | None = Query(default = None),
+    db : Session = Depends(get_db)) : 
+    query = db.query(Inventory)
+
+    if comapny_id is not None : 
+        query = query.filter(Inventory.company_id == comapny_id)
+
+    return query.all()
+
