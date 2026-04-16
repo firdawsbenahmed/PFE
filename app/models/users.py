@@ -11,4 +11,4 @@ class Users(Base):
     password_hash = Column(String, nullable=False, unique=True)
     role = Column(String, nullable=False, default="Admin")
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now()) 
