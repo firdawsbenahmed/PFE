@@ -1,5 +1,5 @@
 from app.models.company import Company
-from app.models.users import Users
+from app.models.user import User
 from app.models.Store import Store
 from app.models.inventory import Inventory
 from app.models.product import Product
