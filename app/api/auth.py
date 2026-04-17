@@ -38,4 +38,15 @@ def Create_user(user : UserCreate , db: Session = Depends(get_db)) :
     db.refresh(new_user)
 
     return new_user
+@router.post("/LogIn") 
+def Login(user : LoginUser , db : Session = Depends(get_db)): 
+
+    user_exist = db.query(User).filter(User.email == user.email).first()
+
+    if not user_exist : 
+        raise HTTPException(status_code=404 , detail="this email does not exist !!")
+
+    if not verify_password(user.password, user_exist.password_hash) : 
+        raise HTTPException(status_code=404, detail="wrong password !")
     
+    return {"login successful"}
