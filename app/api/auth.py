@@ -43,18 +43,20 @@ def Login(user : LoginUser , db : Session = Depends(get_db)):
 
     user_exist = db.query(User).filter(User.email == user.email).first()
 
-    if not user_exist : 
-        raise HTTPException(status_code=404 , detail="this email does not exist !!")
+    if not user_exist or not verify_password(user.password, user_exist.password_hash) : 
+        raise HTTPException(status_code=401 , detail="Invalid credentials")
 
-    if not verify_password(user.password, user_exist.password_hash) : 
-        raise HTTPException(status_code=404, detail="wrong password !")
+    if not user_exist.is_active:
+        raise HTTPException(status_code=403, detail="Account disabled")
     
     access_token =  create_access_token (
-        data ={"sub": user_exist.email }
+        data ={"sub": str(user_exist.id), "company_id": user_exist.company_id}
     )
     return {
         "access_token" : access_token,
-        "token_type": "bearer" ## i used this cz it is a standard way to send tokens in HTTP
+        "token_type": "bearer" ,## i used this cz it is a standard way to send tokens in HTTP
+        "company_id": user_exist.company_id,
+        "role" : user_exist.role
     }
 @router.get("/me")
 def get_me(current_user: User = Depends(get_current_user)):

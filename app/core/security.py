@@ -1,12 +1,7 @@
 from passlib.context import CryptContext
-from jose import jwt, JWTError
+from jose import jwt
 from datetime import datetime , timedelta, timezone
-from fastapi import HTTPException,Depends
-from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.models.user import User
-from fastapi.security import HTTPBearer
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
 
 import os
 from dotenv import load_dotenv
@@ -20,7 +15,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes= ["bcrypt"], deprecated = "auto")
 
 
-security = HTTPBearer()
 
 def hash_password (password : str) -> str : 
     return pwd_context.hash(password)
@@ -40,29 +34,3 @@ def create_access_token(data : dict) :
 
     return encoded_jwt
 
-def get_current_user(
-        credentials: HTTPAuthorizationCredentials = Depends(security),
-        db: Session= Depends(get_db)) : 
-    credential_exception = HTTPException(
-
-        status_code=401, 
-        detail="could not validate these credentials"
-    )
-
-    try : 
-        token = credentials.credentials
-        playload = jwt.decode(token, SECRET_KEY , algorithms=[ALGORITHM])
-
-        email : str = playload.get("sub")
-
-        if email is None : 
-            raise credential_exception 
-    except JWTError : 
-        raise credential_exception 
-    
-    user = db.query(User).filter(User.email == email).first()
-
-    if user is None : 
-        raise credential_exception 
-    
-    return user 
