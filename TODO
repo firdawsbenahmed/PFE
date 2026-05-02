@@ -1,0 +1,7 @@
+TO DO FOR Tommorow :
+finish JWT
+add an email validation system (very important) ==> feature/email-verification
+Password reset flow 
+
+TO DO for later : 
+finish the oother endpoint function comapny , product , store  and the delete and update user endpoint
