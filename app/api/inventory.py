@@ -7,24 +7,19 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List
 from sqlalchemy.orm import Session 
 from app.core.database import get_db
+from app.models.user import User
+from app.core.deps import get_current_user
 
 
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
 @router.post("/", response_model= ResponseInventory)
-def create_inventory(item : CreateInventory, db : Session = Depends(get_db)) : 
+def create_inventory(item : CreateInventory, db : Session = Depends(get_db), current_user : User = Depends(get_current_user)) : 
 
-    ### checking for the existance of the company 
-
-    company = db.query(Company).filter(Company.id == item.company_id).first()
-
-    if not company : 
-        raise HTTPException (status_code=404 , detail="company does not exist !!")
-    
     ## cheching if product exists 
 
     product_existing = db.query(Product).filter(
-        Product.company_id == item.company_id,
+        Product.company_id == current_user.company_id,
         Product.id == item.product_id
     ).first()
 
@@ -36,7 +31,7 @@ def create_inventory(item : CreateInventory, db : Session = Depends(get_db)) :
 
     store_existing = db.query(Store).filter(
         Store.id == item.store_id,
-        Store.company_id == item.company_id
+        Store.company_id == current_user.company_id
     ).first()
 
     if not store_existing : 
@@ -46,7 +41,7 @@ def create_inventory(item : CreateInventory, db : Session = Depends(get_db)) :
     ## we check if the inventory already exists and add the new quantity to it 
 
     inventory_exist = db.query(Inventory).filter(
-        Inventory.company_id == item.company_id,
+        Inventory.company_id == current_user.company_id,
         Inventory.store_id == item.store_id,
         Inventory.product_id == item.product_id
     ).first()
@@ -59,7 +54,7 @@ def create_inventory(item : CreateInventory, db : Session = Depends(get_db)) :
     ## if it does not exist we create a new ofcrs 
 
     new_inventory = Inventory(
-        company_id = item.company_id,
+        company_id = current_user.company_id,
         product_id = item.product_id,
         store_id = item.store_id,
         quantity = item.quantity  
@@ -72,23 +67,25 @@ def create_inventory(item : CreateInventory, db : Session = Depends(get_db)) :
 
 @router.get("/",response_model=List[ResponseInventory])
 def get_inventory(
-    comapny_id: int | None = Query(default = None),
-    db : Session = Depends(get_db)) : 
-    query = db.query(Inventory)
-
-    if comapny_id is not None : 
-        query = query.filter(Inventory.company_id == comapny_id)
-
-    return query.all()
+    db : Session = Depends(get_db),
+    current_user : User = Depends(get_current_user)
+    ) : 
+    return db.query(Inventory).filter(
+        Inventory.company_id == current_user.company_id
+        ).all()
 
 ## since our project is multitenant we nee to use the inventory_id so each comapany only aceess its own data
 @router.put("/{inventory_id}", response_model=ResponseInventory)
 def update_inventory_quantity(
         inventory_id: int,
         payload: UpdateInventoryQuantity,
-        db : Session = Depends(get_db)
+        db : Session = Depends(get_db),
+        current_user : User = Depends(get_current_user)
 ):
-    inventory = db.query(Inventory).filter(Inventory.id == inventory_id).first() ## SELECT * FROM inventory WHERE company_id = 1;
+    inventory = db.query(Inventory).filter(
+        Inventory.id == inventory_id,
+        Inventory.company_id == current_user.company_id
+        ).first() ## SELECT * FROM inventory WHERE company_id = 1;
 
     if not inventory : 
         raise HTTPException(status_code=404, detail="inventory record not found")
@@ -101,16 +98,19 @@ def update_inventory_quantity(
 @router.delete("/{inventory_id}")
 def delete_inventory(
     inventory_id : int,
-    db : Session = Depends(get_db)
+    db : Session = Depends(get_db),
+    current_user : User = Depends(get_current_user)
 ):
-    inventory = db.query(Inventory).filter(Inventory.id == inventory_id).first()
+    inventory = db.query(Inventory).filter(
+        Inventory.id == inventory_id,
+        Inventory.company_id == current_user.company_id ## we check the tenant 
+        ).first()
 
     if not inventory : 
         raise HTTPException(status_code=404 , detail="inventory record is not found ")
     
     db.delete(inventory)
     db.commit()
-    db.refresh(inventory)
 
     return {"Inventory record has been deleted successfully !!"}
 
