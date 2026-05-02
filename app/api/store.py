@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from app.schemas.store import CreateStore, StoreResponse
 from app.models.company import Company
 from app.models.Store import Store
-
+from app.core.deps import get_current_user
+from app.models.user import User
 
 router = APIRouter(prefix="/stores", tags=['Stores'] )
 
@@ -29,5 +30,5 @@ def create_store(store : CreateStore, db : Session = Depends(get_db)):
     return new_store 
 
 @router.get("/" , response_model=List[StoreResponse])
-def get_stores(db : Session = Depends(get_db)):
-    return  db.query(Store).all()
+def get_stores(db : Session = Depends(get_db), current_user : User = Depends(get_current_user)):
+    return  db.query(Store.company_id == current_user.company_id).all()
