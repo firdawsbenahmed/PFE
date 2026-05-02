@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from app.models.company import Company 
 from app.models.product import Product 
 from app.schemas.product import ProductCreate , ProductResponse
-
+from app.models.user import User
+from app.core.deps import get_current_user
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
@@ -42,6 +43,6 @@ def create_product(product :ProductCreate, db : Session = Depends(get_db)) :
     return new_product
 
 @router.get("/", response_model=List[ProductResponse]) 
-def get_product(db : Session = Depends(get_db)): 
-    return db.query(Product).all()
+def get_product(db : Session = Depends(get_db), current_user : User = Depends(get_current_user)): 
+    return db.query(Product).filter(Product.company_id == current_user.company_id).all()
 

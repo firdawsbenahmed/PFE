@@ -6,7 +6,7 @@ class ProductCreate(BaseModel) :
     name : str
     sku : str 
     price : float
-    company_id : int 
+    ##company_id : int i have removed it cz it will be provided by the token 
     description : Optional[str] = None
 
 class ProductResponse(BaseModel) : 
