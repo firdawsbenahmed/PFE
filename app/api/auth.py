@@ -5,7 +5,7 @@ from app.models.user import User
 from app.models.company import Company
 from typing import List 
 from app.core.database import get_db
-from app.core.security import hash_password, verify_password
+from app.core.security import hash_password, verify_password, create_access_token,get_current_user
 
 router =APIRouter(prefix="/auth" , tags=["auth"])
 
@@ -49,4 +49,19 @@ def Login(user : LoginUser , db : Session = Depends(get_db)):
     if not verify_password(user.password, user_exist.password_hash) : 
         raise HTTPException(status_code=404, detail="wrong password !")
     
-    return {"login successful"}
+    access_token =  create_access_token (
+        data ={"sub": user_exist.email }
+    )
+    return {
+        "access_token" : access_token,
+        "token_type": "bearer" ## i used this cz it is a standard way to send tokens in HTTP
+    }
+@router.get("/me")
+def get_me(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "company_id": current_user.company_id,
+        "name": current_user.name,
+        "role": current_user.role
+    }
