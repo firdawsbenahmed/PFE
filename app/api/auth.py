@@ -40,3 +40,21 @@ def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_d
      db.add(admin_user)
      db.commit()
      db.refresh(admin_user)
+
+     token = create_access_token({ 
+        "sub" : str(admin_user.id), 
+        "company_id" : admin_user.company_id,
+        "role" : admin_user.role
+        }
+     )  
+     return TokenResponse(
+          
+        access_token = token,
+        token_type = "bearer",
+        company_id= admin_user.company_id,
+        role = admin_user.role,
+        name = admin_user.name
+
+     ) ## here the admin after the registration will automatically be logged in
+
+

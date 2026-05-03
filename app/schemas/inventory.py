@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field   
 
 class CreateInventory(BaseModel):
-    ##company_id : int it will be given by the token :)
+    ##company_id : int it will be given by the JWT token :)
     product_id : int 
     store_id : int 
     quantity: int = Field(gt=0) 
