@@ -88,3 +88,44 @@ def Login(data: LoginRequest , db : Session =Depends(get_db)) :
           role=user.role,
           name=user.name
      )
+
+## process of the admin creating the users 
+@router.post("/register-employee") 
+def register_employee(
+     data : RegisterEmployeeRequest , 
+     db : Session = Depends(get_db),
+     current_user : User = Depends(get_current_user) ## bcz we want the admin which is the current user to create the employee
+): 
+     ## deque only the admin can create the employee we need to check wether the current user is the admin 
+
+    if current_user.role != "admin" : 
+         raise HTTPException(status_code=403 , detail="only admins can create employees")
+    
+    ## see if the email deja exists 
+
+    user_existance = db.query(User).filter(
+         User.email == data.email,
+         User.company_id == current_user.company_id
+    )
+    if user_existance : 
+         raise HTTPException(status_code=404 , detail="this user already exists")
+    
+    new_user = User(
+         company_id = current_user.company_id,
+         name = data.name,
+         email = data.email,
+         password_hash =hash_password(data.password),
+         role = data.role,
+         is_active = True
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return {
+         "id" : new_user.id,
+         "name": new_user.name,
+         "email":new_user.email,
+         "role":new_user.role,
+         "company_id": new_user.company_id
+    }
