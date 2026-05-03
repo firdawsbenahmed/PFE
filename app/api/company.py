@@ -14,7 +14,7 @@ router = APIRouter(prefix="/companies", tags=["companies"])
 
 @router.post("/", response_model= CompanyResponse)
 def create_company(company: CompanyCreate, db: Session = Depends(get_db)):
-    existing = db.query(company).filter(Company.email == company.email).first()
+    existing = db.query(Company).filter(Company.email == company.email).first()
     if existing : 
         raise HTTPException(status_code=400, detail = "email already used")
     new_company = Company(
