@@ -22,6 +22,6 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel): 
     access_token: str
     token_type: str="bearer"
-    company_id: str
+    company_id: int
     role : str
     name : str

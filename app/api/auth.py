@@ -7,6 +7,7 @@ from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token
 from app.core.deps import get_current_user
 from app.schemas.user import UserResponse
+from sqlalchemy.exc import IntegrityError
 
 router =APIRouter(prefix="/auth" , tags=["auth"])
 
@@ -15,7 +16,7 @@ router =APIRouter(prefix="/auth" , tags=["auth"])
 @router.post("/register-company", response_model= TokenResponse)
 def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_db)): 
      ## we check the existance of the email 
-     email_exists = db.query(data).filter(User.email == data.email).first()
+     email_exists = db.query(User).filter(User.email == data.email).first()
      if email_exists : 
           raise HTTPException(status_code=404, detail= "email already used")
      ## in case this email is not used then we create the company 
@@ -26,7 +27,13 @@ def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_d
           status = "active"
      )
      db.add(new_company)
-     db.flush() ### fulsh() so we have the company id before we commit 
+      ### fulsh() so we have the company id before we commit 
+
+     try:
+        db.flush()
+     except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Email already registered")
 
      admin_user = User(
           name = data.admin_name,
@@ -50,7 +57,6 @@ def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_d
      return TokenResponse(
           
         access_token = token,
-        token_type = "bearer",
         company_id= admin_user.company_id,
         role = admin_user.role,
         name = admin_user.name
@@ -66,24 +72,19 @@ def Login(data: LoginRequest , db : Session =Depends(get_db)) :
      ### check the user existance 
      user = db.query(User).filter(User.email == data.email).first()
     ## verifying the password 
-     password_correctness = verify_password(User.password_hash , data.password)
+     password_correctness = verify_password(data.password , user.password_hash)
       
-     if not user or password_correctness: 
+     if not user or not password_correctness : 
         raise HTTPException(status_code=401 , detail="invalid credentials")
-     
-    ## see if the user is active or not 
-     if not user.is_active : 
-          raise HTTPException(status_code=403 , detail="this account is disabled" )
-     
-     token = TokenResponse({
-     "sub" : user.id,
+
+     token = create_access_token({
+     "sub" : str(user.id),
      "company_id" : user.company_id,
      "role" : user.role
 
      })
      return TokenResponse(
           access_token = token,
-          token_type = "bearer",
           company_id = user.company_id,
           role=user.role,
           name=user.name
@@ -106,7 +107,7 @@ def register_employee(
     user_existance = db.query(User).filter(
          User.email == data.email,
          User.company_id == current_user.company_id
-    )
+    ).first()
     if user_existance : 
          raise HTTPException(status_code=404 , detail="this user already exists")
     

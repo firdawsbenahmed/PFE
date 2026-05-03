@@ -16,7 +16,7 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY") 
 
 ALGORITHM = "HS256" 
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 700 
 
 security = HTTPBearer()
 
@@ -32,9 +32,9 @@ def get_current_user(
 
     try : 
         token = credentials.credentials
-        playload = jwt.decode(token, SECRET_KEY , algorithms=[ALGORITHM])
+        plaload = jwt.decode(token, SECRET_KEY , algorithms=[ALGORITHM])
 
-        user_id : str = playload.get("sub")
+        user_id : str = plaload.get("sub")
 
         if user_id is None : 
             raise credential_exception 

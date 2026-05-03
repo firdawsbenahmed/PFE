@@ -7,4 +7,4 @@ from app.api.inventory import router as inventory_router
 from app.api.auth import router as auth_router 
 app = FastAPI()
 
-app.include_router(company_router)
+app.include_router(auth_router)
