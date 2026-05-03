@@ -1,4 +1,3 @@
-from app.schemas.user import UserCreate, UserResponse,LoginUser
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.models.user import User 
@@ -7,6 +6,7 @@ from app.schemas.auth import TokenResponse, RegisterCompanyRequest,LoginRequest,
 from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token
 from app.core.deps import get_current_user
+from app.schemas.user import UserResponse
 
 router =APIRouter(prefix="/auth" , tags=["auth"])
 
@@ -90,7 +90,7 @@ def Login(data: LoginRequest , db : Session =Depends(get_db)) :
      )
 
 ## process of the admin creating the users 
-@router.post("/register-employee") 
+@router.post("/register-employee", response_model=UserResponse) 
 def register_employee(
      data : RegisterEmployeeRequest , 
      db : Session = Depends(get_db),
@@ -122,13 +122,7 @@ def register_employee(
     db.commit()
     db.refresh(new_user)
 
-    return {
-         "id" : new_user.id,
-         "name": new_user.name,
-         "email":new_user.email,
-         "role":new_user.role,
-         "company_id": new_user.company_id
-    }
+    return new_user
 
 ## now we want to get the current user informations 
 @router.get("/me")
