@@ -58,3 +58,33 @@ def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_d
      ) ## here the admin after the registration will automatically be logged in
 
 
+### nrml login process this login process is for the admin and the users added later by the admin so it a public login process 
+
+@router.post("/Login", response_model= TokenResponse)
+def Login(data: LoginRequest , db : Session =Depends(get_db)) : 
+     
+     ### check the user existance 
+     user = db.query(User).filter(User.email == data.email).first()
+    ## verifying the password 
+     password_correctness = verify_password(User.password_hash , data.password)
+      
+     if not user or password_correctness: 
+        raise HTTPException(status_code=401 , detail="invalid credentials")
+     
+    ## see if the user is active or not 
+     if not user.is_active : 
+          raise HTTPException(status_code=403 , detail="this account is disabled" )
+     
+     token = TokenResponse({
+     "sub" : user.id,
+     "company_id" : user.company_id,
+     "role" : user.role
+
+     })
+     return TokenResponse(
+          access_token = token,
+          token_type = "bearer",
+          company_id = user.company_id,
+          role=user.role,
+          name=user.name
+     )
