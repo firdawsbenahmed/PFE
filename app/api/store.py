@@ -11,18 +11,18 @@ from app.models.user import User
 router = APIRouter(prefix="/stores", tags=['Stores'] )
 
 @router.post("/", response_model=StoreResponse)
-def create_store(store : CreateStore, db : Session = Depends(get_db)): 
+def create_store(store : CreateStore, db : Session = Depends(get_db), current_user : User = Depends(get_current_user)): 
 
     ## we see if the company exists 
 
-    company = db.query(Company).filter(Company.id == store.company_id).first()
+    company = db.query(Company).filter(Company.id == current_user.company_id).first()
     if not company : 
         raise HTTPException(status_code= 404 , detail="company does not exist !!")
     
     new_store = Store(
         name = store.name,
         location = store.location,
-        company_id = store.company_id,
+        company_id = current_user
     )
     db.add(new_store)
     db.commit()
@@ -31,4 +31,4 @@ def create_store(store : CreateStore, db : Session = Depends(get_db)):
 
 @router.get("/" , response_model=List[StoreResponse])
 def get_stores(db : Session = Depends(get_db), current_user : User = Depends(get_current_user)):
-    return  db.query(Store.company_id == current_user.company_id).all()
+    return  db.query(Store).filter(Store.company_id == current_user.company_id).all()
