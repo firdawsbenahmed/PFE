@@ -2,18 +2,18 @@ from pydantic import BaseModel , Field
 from datetime import datetime
 from typing import Literal, List, Optional
 
-class CreateFlightClass(BaseModel): 
+class FlightClassCreate(BaseModel): 
     class_type : Literal["economy","buisness","first"]
     price : int = Field(gt = 0)
     total_seats : int = Field(gt = 0) 
 
-class CreateFlight(BaseModel): 
+class FlightCreate(BaseModel): 
     flight_number : str 
     origin : str 
     destination : str 
     departure_time : datetime
     arrival_time : datetime 
-    classes : List[CreateFlightClass]
+    classes : List[FlightClassCreate]
 
 class FlightClassResponse(BaseModel): 
     id : int
@@ -33,7 +33,7 @@ class FlightResponse(BaseModel):
     destination : str 
     departure_time : datetime
     arrival_time : datetime 
-    classes : Optional[List[CreateFlightClass]] = [] 
+    classes : Optional[List[FlightClassCreate]] = [] 
 
     class Config : 
         from_attributes = True    
