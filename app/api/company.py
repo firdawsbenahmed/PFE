@@ -9,7 +9,7 @@ from app.models.user import User
 
 router = APIRouter(prefix="/companies", tags=["companies"])
 
-
+    
 @router.get("/me", response_model=CompanyResponse)
 def get_my_company(
     db: Session = Depends(get_db),
