@@ -8,6 +8,9 @@ from app.models.endpoint import Endpoints
 from app.models.api_integration import ApiIntegration
 from app.models.audit_log import AuditLogs
 from app.models.mcp_tool_permission import Mcp_tool_p
+from app.models.flights import Flight
+from app.models.flight_classes import Flight_class
+from app.models.booking import Booking
 
 ## this file is usefull for the imports 
 ## later in for the Alembic and if i need to import all the app.models 

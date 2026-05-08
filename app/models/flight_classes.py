@@ -2,7 +2,8 @@ from sqlalchemy import Column, Integer,Enum, ForeignKey
 from app.core.database import Base
 
 class Flight_class(Base): 
-    __tabelname__ = "flight_class"
+
+    __tablename__ = "flight_class"
 
     id = Column(Integer, primary_key=True, index=True)
     flight_id = Column(Integer, ForeignKey("flights.id"),nullable=False)

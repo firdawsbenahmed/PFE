@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 class Booking(Base): 
     __tablename__ = "bookings"
     id = Column(Integer, primary_key=True, index=True)
-    company_id = Column(Integer, ForeignKey("company.id"), nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
     flight_id = Column(Integer, ForeignKey("flights.id"), nullable=False)
     flight_class_id = Column(Integer, ForeignKey("flight_class.id"), nullable=False)
     passenger_name = Column(String, nullable=False)
