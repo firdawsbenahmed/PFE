@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List 
+from typing import List
 from app.core.deps import get_current_user
 from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token
@@ -41,3 +41,20 @@ def create_flight(
     db.refresh(new_flight)
 
     return new_flight
+
+@router.get("/", response_model=List[FlightResponse])
+def get_flights(
+   
+    origin : str | None = Query(default = None),
+    destination : str | None = Query(default=None),
+    db : Session = Depends(get_db),
+    current_user : User = Depends(get_current_user),
+):
+    flight = db.query(Flight).filter(Flight.company_id == current_user.company_id) 
+
+    if origin : 
+        query = flight.filter(Flight.origin == origin)
+    if destination : 
+        query = flight.filter(Flight.destination == destination)
+    
+    return query.all()
