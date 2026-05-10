@@ -5,6 +5,7 @@ from app.api.product import router as product_router
 from app.api.store import router as store_router
 from app.api.inventory import router as inventory_router
 from app.api.auth import router as auth_router 
+from app.api.flight import router as flight_router
 app = FastAPI()
 
-app.include_router(company_router)
+app.include_router(flight_router)

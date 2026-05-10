@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Literal, List, Optional
 
 class FlightClassCreate(BaseModel): 
-    class_type : Literal["economy","buisness","first"]
+    class_type : Literal["economy","business","first"]
     price : int = Field(gt = 0)
     total_seats : int = Field(gt = 0) 
 
@@ -13,7 +13,7 @@ class FlightCreate(BaseModel):
     destination : str 
     departure_time : datetime
     arrival_time : datetime 
-    classes : List[FlightClassCreate]
+    classes : List[FlightClassCreate] = Field(min_length=1 , max_length=3)
 
 class FlightClassResponse(BaseModel): 
     id : int
@@ -28,6 +28,7 @@ class FlightClassResponse(BaseModel):
 
 class FlightResponse(BaseModel): 
     id : int 
+    company_id : int 
     flight_number : str 
     origin : str 
     destination : str 
