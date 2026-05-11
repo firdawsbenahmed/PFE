@@ -7,14 +7,13 @@ class BookinCreate(BaseModel) :
     passenger_name : str 
     passenger_email : EmailStr 
 
-class BookingResponse : 
+class BookingResponse (BaseModel): 
     id : int 
     company_id : int 
     flight_id : int 
     flight_class_id : int 
     passenger_name : str 
     passenger_email : EmailStr    
-    create_at : datetime
     status : str 
 
     class Config : 

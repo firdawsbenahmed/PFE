@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.core.deps import get_current_user
 from app.core.database import get_db
-from app.core.security import hash_password, verify_password, create_access_token
 from app.models.user import User
 from app.models.flight_classes import Flight_class
 from app.models.flights import Flight
