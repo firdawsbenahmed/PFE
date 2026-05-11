@@ -48,3 +48,12 @@ def create_booking(
     db.refresh(new_booking)
 
     return new_booking  
+@router.get("/", response_model=BookingResponse)
+def get_bookings(
+    db: Session = Depends(get_db),
+    current_user : User = Depends(get_current_user)
+) : 
+    bookings = db.query(Booking).filter(
+        Booking.company_id == current_user.company_id,
+    ).first()
+    return bookings
