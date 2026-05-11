@@ -56,5 +56,6 @@ def get_flights(
         query = flight.filter(Flight.origin == origin)
     if destination : 
         query = flight.filter(Flight.destination == destination)
-    
-    return query.all()
+        return query.all()
+
+    return flight.all()
