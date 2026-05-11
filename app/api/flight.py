@@ -59,3 +59,15 @@ def get_flights(
         return query.all()
 
     return flight.all()
+@router.get("/{flight_id}", response_model=FlightResponse)
+def get_flight_by_id(
+    flight_id : int ,
+    db: Session = Depends(get_db),
+    current_user : User = Depends(get_current_user),
+) : 
+    flight = db.query(Flight).filter(Flight.id == flight_id , Flight.company_id == current_user.company_id).first()
+
+    if not flight : 
+        raise HTTPException(status_code=404 , detail="the flight not found ")
+    
+    return flight 
