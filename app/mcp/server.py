@@ -27,7 +27,7 @@ def flight_search(
         params["destination"] = destination
     ## the mcp will call the backend 
     response = requests.get( ## to call FastAPI routes
-        f"{BASE_URL}/flights/", ##calls the api so it doen not access the database directly  
+        f"{BASE_URL}/flights/public/search", ##calls the api so it doen not access the database directly  
         params=params
     )
     print(response.json())
