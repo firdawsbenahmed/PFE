@@ -43,7 +43,6 @@ def create_flight(
 
 @router.get("/", response_model=List[FlightResponse])
 def get_flights(
-   
     origin : str | None = Query(default = None),
     destination : str | None = Query(default=None),
     db : Session = Depends(get_db),
@@ -52,12 +51,25 @@ def get_flights(
     flight = db.query(Flight).filter(Flight.company_id == current_user.company_id) 
 
     if origin : 
-        query = flight.filter(Flight.origin == origin)
+        flight = flight.filter(Flight.origin == origin)
     if destination : 
-        query = flight.filter(Flight.destination == destination)
-        return query.all()
-
+        flight = flight.filter(Flight.destination == destination)
     return flight.all()
+
+@router.get("/public/search", response_model=List[FlightResponse])
+def public_search_flight(
+    origin : str | None = Query(default=None),
+    destination : str | None = Query(default=None),
+    db: Session = Depends(get_db)
+) : 
+    query = db.query(Flight)
+
+    if origin : 
+        query = query.filter(Flight.origin ==  origin)
+    if destination : 
+        query = query.filter(Flight.destination == destination)
+    return query.all()
+    
 @router.get("/{flight_id}", response_model=FlightResponse)
 def get_flight_by_id(
     flight_id : int ,
