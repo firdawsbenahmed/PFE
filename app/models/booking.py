@@ -10,4 +10,6 @@ class Booking(Base):
     passenger_name = Column(String, nullable=False)
     passenger_email = Column(String, nullable=False)
     status = Column(String ,default="reserved", nullable=False)
+    payment_status = Column(String, nullable=False , default="unpaid")
+    payment_link = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
