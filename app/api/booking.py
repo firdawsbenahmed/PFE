@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException,Query,Depends
 from sqlalchemy.orm import Session
 import os 
+from pydantic import EmailStr
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.email import email_payment_send
@@ -151,3 +152,19 @@ def guest_ticket_reservation(
         "booking" : new_booking,
         "email_status" : email_result
     }
+
+## if the user wants to see or get his booking info
+@router.get("/guest/{booking_id}")
+def get_guest_booking_details(
+    booking_id : int,
+    passenger_email : EmailStr = Query(...) ,
+    db : Session = Depends(get_db)
+) : 
+    booking = db.query(Booking).filter(
+        Booking.id == booking_id,
+        Booking.passenger_email == passenger_email
+    ).first()
+    if not booking : 
+        raise HTTPException (status_code=404 , detail="the booking does not exist")
+    
+    return booking 
