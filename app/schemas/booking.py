@@ -15,6 +15,8 @@ class BookingResponse (BaseModel):
     passenger_name : str 
     passenger_email : EmailStr    
     status : str 
+    payment_status : str
+    payment_link : str | None = None
 
     class Config : 
         from_attributes = True 
