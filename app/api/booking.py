@@ -1,17 +1,20 @@
 from fastapi import APIRouter, HTTPException,Query,Depends
 from sqlalchemy.orm import Session
-
+import os 
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.core.email import email_payment_send
 from app.models.user import User
 from app.schemas.booking import BookinCreate, BookingResponse
 from app.models.booking import Booking
 from app.models.flights import Flight
 from app.models.flight_classes import Flight_class
 
+
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
 ## i'm sure i'm gonna need it in the mcp tools 
+## update no you won't this is for the admin of the company 
 @router.post("/", response_model=BookingResponse)
 def create_booking(
     booking : BookinCreate,
@@ -40,6 +43,7 @@ def create_booking(
         flight_class_id =class_existance.id,
         passenger_name = booking.passenger_name,
         passenger_email = booking.passenger_email,
+        payment_status = "unpaid",
         status = "reserved"
     )
     class_existance.available_seats -= 1
@@ -90,3 +94,60 @@ def canceling_the_booking(
     db.refresh(booking_exists)
 
     return booking_exists
+
+
+### for the passenger {guest} and the mpc tools 
+
+@router.post("/guest")
+def guest_ticket_reservation(
+    booking : BookinCreate,
+    db : Session = Depends(get_db)
+    ) : 
+    flight = db.query(Flight).filter(
+        Flight.id == booking.flight_id
+    ).first()
+    if not flight : 
+        raise HTTPException(status_code=404 , detail="the flight does not exist")
+    flight_class = db.query(Flight_class).filter(
+        Flight_class.id == booking.flight_class_id,
+        Flight_class.flight_id == booking.flight_id
+    ).first()
+    if not flight_class : 
+        raise HTTPException(status_code=404 , detail="class not found")
+    
+    if flight_class.available_seats <= 0 : 
+        raise HTTPException(status_code=400 , detail = "no available seats")
+    
+    new_booking = Booking(
+        comapny_id = flight.company_id,
+        flight_id = flight.id,
+        flight_class_id = flight_class.id,
+        passenger_name = booking.passenger_name,
+        passenger_email = booking.passenger_email,
+        status = "reserved"
+        payment_status = "unpaid"
+        
+    )
+    flight_class.available_seats -= 1
+    db.add(new_booking)
+    db.flush()
+## the link we need to pay
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    payment_link = f"{frontend_url}/pay/booking/{new_booking.id}"
+
+    new_booking.payment_link = payment_link
+
+    db.commit()
+    db.refresh(new_booking)
+
+    email_result = email_payment_send(
+        to_email= new_booking.passenger_email,
+        passenger_name= new_booking.passenger_name,
+        booking_id= new_booking.id,
+        payment_link= new_booking.payment_link
+    )
+
+    return {
+        "booking" : new_booking,
+        "email_status" : email_result
+    }

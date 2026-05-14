@@ -1,5 +1,5 @@
 from pydantic import EmailStr
-import smtplib
+import smtplib ## Python library used to communicate with email servers simple message transfer protocole
 import os 
 from email.message  import EmailMessage
 
@@ -12,14 +12,15 @@ def email_payment_send (
     sender_email = os.getenv("EMAIL_USER")
     sender_password = os.getenv("EMAIL_PASSWORD")
 
-    if not sender_email or not sender_password : 
+    if not sender_email or not sender_password : ## if these two are wrong the app won't crash we only skip sending the email hada mekan 
         return{
             "success" : False,
             "message" : "email credentials are missing"
         }
     
     try : 
-        msg = EmailMessage()
+        msg = EmailMessage() ## here to create and email object 
+        ## the metadata of the email like the content ....
         msg["Subject"] = "complete your flight payment"
         msg["From"] = sender_email ## company email remeber to fix this :)
         msg["To"] = to_email
@@ -34,9 +35,9 @@ Please complete your payment here :
 Thank you , have a nice day :) 
 """
         )
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp : 
-            smtp.login(sender_email, sender_password)
-            smtp.send_message(msg)
+        with smtplib.SMTP_SSL("smtp.gmail.com" , 465) as smtp : ## to connect securly with the Gmail SMTP sever through the port 465 SSL and in an encrypted way SMTP_SSL this connection will be auto close 
+            smtp.login(sender_email, sender_password) ## to authentificate the Gmail with my backend 
+            smtp.send_message(msg) ## send the msg core created before 
         return{
             "success" : True,
             "message" : "Email sent successfuly"
