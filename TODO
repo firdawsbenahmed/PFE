@@ -4,3 +4,36 @@ Password reset flow
 changing the email by the admin for the user cz no need to create a new employee if the old employee has felt awe diasable the account in case if a new one came we only change the email and the the password or just the email 
 TO DO for later : 
 finish the oother endpoint function comapny , product , store  and the delete and update user endpoint
+
+the payment : 
+
+1. ChatGPT reserves ticket
+2. Backend creates booking: reserved + unpaid
+3. Email contains payment link
+4. You open the payment link
+5. Mock payment page shows “Pay Now”
+6. You click “Pay Now”
+7. Frontend calls backend payment endpoint
+8. Booking becomes reserved + paid
+9. Admin dashboard shows Paid
+
+Payment processing is currently simulated for MVP demonstration purposes.
+The architecture is designed to support future integration with real payment providers through webhook-based confirmation systems.
+
+Later In Production
+
+You replace:
+
+mock_pay_booking()
+
+with:
+
+real payment provider integration
+
+Example:
+
+Stripe
+Chargily
+PayPal
+CIB
+SATIM

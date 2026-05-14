@@ -200,3 +200,27 @@ def cancel_booking(
     db.refresh(booking)
 
     return booking 
+
+## PAYNG FINALLY 
+@router.put("/guest/{booking_id}/pay")
+def pay_booking( ## this is the simulation of payment later on when the contract with the payment agency i will put the code here 
+    booking_id : int,
+    passenger_email : EmailStr = Query(...),
+    db : Session = Depends(get_db)
+) : 
+    booking = db.query(Booking).filter(
+        Booking.id == booking_id,
+        Booking.passenger_email == passenger_email
+        ).first()
+    if not booking : 
+        raise HTTPException (status_code=404 , detail="the booking does not exist")
+    if booking.status == "cancelled" : 
+        raise HTTPException(status_code=400, detail="the booking is already cancelled")
+    if booking.payment_status == "paid" : 
+        raise HTTPException(status_code=404 , detail="it is already paid")
+    
+    booking.status = "paid"
+    db.commit()
+    db.refresh(booking)
+
+    return booking 
