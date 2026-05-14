@@ -4,7 +4,7 @@ from typing import Optional
 class CompanyResponse( BaseModel) : 
     id : int 
     name : str 
-    email : str 
+    email : EmailStr
     industry : str
     status : str
 
