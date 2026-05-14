@@ -224,3 +224,38 @@ def pay_booking( ## this is the simulation of payment later on when the contract
     db.refresh(booking)
 
     return booking 
+
+## updating the email 
+@router.put("/guest/{booking_id}/email")
+def pay_booking( 
+    booking_id : int,
+    old_email : EmailStr = Query(...),
+    new_email : EmailStr = Query(...),
+    db : Session = Depends(get_db)
+) : 
+    booking = db.query(Booking).filter(
+        Booking.id == booking_id,
+        Booking.passenger_email == old_email
+        ).first()
+    if not booking : 
+        raise HTTPException (status_code=404 , detail="the booking does not exist")
+    if booking.status == "cancelled" : 
+        raise HTTPException(status_code=400, detail="can not update cancelled booking")
+    if booking.payment_status == "paid" : 
+        raise HTTPException(status_code=404 , detail="can not update email after payment")
+    
+    booking.passenger_email = new_email
+
+    email_result = email_payment_send(
+        to_email= new_email,
+        passenger_name= booking.passenger_name,
+        booking_id= booking.id,
+        payment_link= booking.payment_link
+    )
+    db.commit()
+    db.refresh(booking)
+
+    return{
+        "booking" : booking,
+        "email_status" : email_result
+    }
