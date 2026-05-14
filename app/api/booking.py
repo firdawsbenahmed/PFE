@@ -125,7 +125,7 @@ def guest_ticket_reservation(
         flight_class_id = flight_class.id,
         passenger_name = booking.passenger_name,
         passenger_email = booking.passenger_email,
-        status = "reserved"
+        status = "reserved",
         payment_status = "unpaid"
         
     )
@@ -167,4 +167,36 @@ def get_guest_booking_details(
     if not booking : 
         raise HTTPException (status_code=404 , detail="the booking does not exist")
     
+    return booking 
+## to cancel the booking by the guest 
+@router.put("/guest/{booking_id}/cancel")
+def cancel_booking(
+    booking_id : int , 
+    passenger_email : EmailStr = Query(...),
+    db : Session = Depends(get_db)
+) : 
+    booking = db.query(Booking).filter(
+        Booking.id == booking_id,
+        Booking.passenger_email == passenger_email
+        ).first()
+    if not booking : 
+        raise HTTPException (status_code=404 , detail="the booking does not exist")
+    if booking.status == "cancelled" : 
+        raise HTTPException(status_code=400, detail="the booking is already cancelled")
+    
+    ## the classsss
+
+    flight_class = db.query(Flight_class).filter(
+        Flight_class.flight_id == booking.flight_id,
+        Flight_class.id == booking.flight_class_id,
+    ).first()
+
+    if not flight_class : 
+        raise HTTPException(status_code=404, detail="this class does not exist")
+    booking.status = "cancelled"
+    flight_class.available_seats += 1
+
+    db.commit()
+    db.refresh(booking)
+
     return booking 
