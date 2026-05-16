@@ -69,8 +69,31 @@ def get_booking_details(
         }
     )
     return response.json()
-if __name__ == "__main__":
-    mcp.run()
 
 #############################################################################################
-######################
+###################### updating the booking email ###########################################
+
+@mcp.tool()
+def update_booking_email(
+    booking_id : int,
+    old_email : EmailStr ,
+    new_email : EmailStr
+) : 
+    response = requests.put(
+        f"{BASE_URL}/bookings/guest/{booking_id}/email",
+        params={
+            "old_email" : old_email ,
+            "new_email" : new_email           
+        }
+    )
+
+    return response.json()
+
+if __name__ == "__main__":
+    result = update_booking_email(
+    booking_id=5,
+    old_email="correctemail@gmail.com",
+    new_email="benahmedf22@gmail.com"
+    )
+
+    print(result)
