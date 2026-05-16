@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException,Query,Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session      
 import os 
 from pydantic import EmailStr
 from app.core.database import get_db
@@ -138,15 +138,22 @@ def guest_ticket_reservation(
 
     new_booking.payment_link = payment_link
 
-    db.commit()
-    db.refresh(new_booking)
-
     email_result = email_payment_send(
         to_email= new_booking.passenger_email,
         passenger_name= new_booking.passenger_name,
         booking_id= new_booking.id,
         payment_link= new_booking.payment_link
     )
+    if email_result.get("success") is True : 
+        new_booking.email_status = "sent",
+        new_booking.email_error = None
+    else :  
+        new_booking.email_status = "failed",
+        new_booking.email_error = email_result.get("message", "unknown email error")  
+
+
+    db.commit()
+    db.refresh(new_booking)
 
     return {
         "booking" : new_booking,
@@ -251,7 +258,15 @@ def pay_booking(
         passenger_name= booking.passenger_name,
         booking_id= booking.id,
         payment_link= booking.payment_link
-    )
+                )   
+    if email_result.get("success") is True : 
+        booking.email_status = "sent",
+        booking.email_error = None
+    else :  
+        booking.email_status = "failed",
+        booking.email_error = email_result.get("message", "unknown email error")  
+    
+
     db.commit()
     db.refresh(booking)
 

@@ -43,7 +43,7 @@ def reserve_ticket(
     passenger_name : str,
     passenger_email : EmailStr
 ) : 
-    playload = {
+    payload = {
     "flight_id" : flight_id ,
     "flight_class_id" : flight_class_id , 
     "passenger_name" : passenger_name,
@@ -51,9 +51,10 @@ def reserve_ticket(
     }
     response = requests.post(
         f"{BASE_URL}/bookings/guest",
-        json=playload
+        json=payload
     )
     return response.json()
+
 
 ############################################################################################
 
@@ -89,11 +90,9 @@ def update_booking_email(
 
     return response.json()
 
-if __name__ == "__main__":
-    result = update_booking_email(
-    booking_id=5,
-    old_email="correctemail@gmail.com",
-    new_email="benahmedf22@gmail.com"
-    )
-
-    print(result)
+result = update_booking_email(
+    booking_id=17,
+    old_email="totallyfakeemail123@gmail.com",
+    new_email="your_real_email@gmail.com"
+)
+print(result)
