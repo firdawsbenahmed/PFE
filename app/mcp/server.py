@@ -31,8 +31,7 @@ def flight_search(
     )
     return response.json()
 
-if __name__ == "__main__":
-    mcp.run()
+
 ###########################################################################################
 
 #################################the reservation tool ######################################
@@ -55,7 +54,23 @@ def reserve_ticket(
         json=playload
     )
     return response.json()
+
+############################################################################################
+
+@mcp.tool()
+def get_booking_details(
+    booking_id : int , 
+    passenger_email : EmailStr 
+) : 
+    response = requests.get(
+        f"{BASE_URL}/bookings/guest/{booking_id}",
+        params={
+        "passenger_email" : passenger_email           
+        }
+    )
+    return response.json()
 if __name__ == "__main__":
     mcp.run()
 
-############################################################################################
+#############################################################################################
+######################
