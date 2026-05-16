@@ -1,6 +1,6 @@
 from fastmcp import FastMCP
 import requests
-
+from pydantic import EmailStr
 mcp = FastMCP("aviation business MCP")
 BASE_URL = "HTTP://127.0.0.1:8000"
 
@@ -12,15 +12,14 @@ def health_check():
         "message":"mcp server is up" ,
     }
 
-## 1st tool : searching for 
-@mcp.tool() ## AI callable tool
+######################## searching for flight  ####################################
+## AI callable tool
+@mcp.tool() 
 def flight_search(
-
     origin : str | None =None,
     destination : str | None = None
 ):
     params = {} ## Query Parameters
-
     if origin: 
         params["origin"] = origin 
     if destination : 
@@ -30,16 +29,33 @@ def flight_search(
         f"{BASE_URL}/flights/public/search", ##calls the api so it doen not access the database directly  
         params=params
     )
-    print(response.json())
-
     return response.json()
 
-
 if __name__ == "__main__":
-    result = flight_search(
-        origin="Algiers",
-        destination="Frankfurt"
+    mcp.run()
+###########################################################################################
+
+#################################the reservation tool ######################################
+
+@mcp.tool()
+def reserve_ticket(
+    flight_id : int ,
+    flight_class_id : int , 
+    passenger_name : str,
+    passenger_email : EmailStr
+) : 
+    playload = {
+    "flight_id" : flight_id ,
+    "flight_class_id" : flight_class_id , 
+    "passenger_name" : passenger_name,
+    "passenger_email" : passenger_email        
+    }
+    response = requests.post(
+        f"{BASE_URL}/bookings/guest",
+        json=playload
     )
+    return response.json()
+if __name__ == "__main__":
+    mcp.run()
 
-    print(result)
-
+############################################################################################
