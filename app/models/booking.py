@@ -12,4 +12,6 @@ class Booking(Base):
     status = Column(String ,default="reserved", nullable=False)
     payment_status = Column(String, nullable=False , default="unpaid")
     payment_link = Column(String, nullable=True)
+    email_status = Column(String,nullable=False, default="not_sent")
+    email_error = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
