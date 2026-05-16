@@ -120,7 +120,7 @@ def guest_ticket_reservation(
         raise HTTPException(status_code=400 , detail = "no available seats")
     
     new_booking = Booking(
-        comapny_id = flight.company_id,
+        company_id = flight.company_id,
         flight_id = flight.id,
         flight_class_id = flight_class.id,
         passenger_name = booking.passenger_name,
