@@ -41,6 +41,23 @@ def create_flight(
     db.refresh(new_flight)
 
     return new_flight
+@router.get("/{flight_id}/available")
+def available_seats(
+    flight_id : int ,
+    db : Session = Depends(get_db)
+) : 
+    flight = db.query(Flight).filter(
+        Flight.id == flight_id
+    ).first()
+    if not flight : 
+        raise HTTPException(status_code=404 , detail="the flight does not exist")
+    classes = db.query(Flight_class).filter(
+        Flight_class.flight_id == flight_id
+    ).all()
+    return {
+        "flight_id" : flight_id,
+        "classes" : classes
+    }
 
 @router.get("/", response_model=List[FlightResponse])
 def get_flights(
