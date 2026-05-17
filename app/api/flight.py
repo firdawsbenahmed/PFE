@@ -6,6 +6,7 @@ from app.core.database import get_db
 from app.models.user import User
 from app.models.flight_classes import Flight_class
 from app.models.flights import Flight
+from app.models.company import Company
 from app.schemas.flight import FlightCreate,FlightResponse
 
 router = APIRouter(prefix="/flights",tags=["flights"])
@@ -60,15 +61,20 @@ def get_flights(
 def public_search_flight(
     origin : str | None = Query(default=None),
     destination : str | None = Query(default=None),
+    company_name : str | None = Query(default=None),
     db: Session = Depends(get_db)
 ) : 
     query = db.query(Flight)
+    if company_name: 
+        query = query.join(Company , Flight.company_id == Company.id) ### Connect each flight to its airline/company
+        query = query.filter(Company.name.ilike(f"%{company_name}%")) ## Keep only flights whose company name matches the user input
 
     if origin : 
         query = query.filter(Flight.origin ==  origin)
     if destination : 
         query = query.filter(Flight.destination == destination)
     return query.all()
+
     
 @router.get("/{flight_id}", response_model=FlightResponse)
 def get_flight_by_id(
@@ -82,3 +88,4 @@ def get_flight_by_id(
         raise HTTPException(status_code=404 , detail="the flight not found ")
     
     return flight 
+
