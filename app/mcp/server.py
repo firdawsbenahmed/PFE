@@ -2,7 +2,7 @@ from fastmcp import FastMCP
 import requests
 from pydantic import EmailStr
 mcp = FastMCP("aviation business MCP")
-BASE_URL = "HTTP://127.0.0.1:8000"
+BASE_URL = "http://127.0.0.1:8000"
 
 @mcp.tool()
 
@@ -17,20 +17,23 @@ def health_check():
 @mcp.tool() 
 def flight_search(
     origin : str | None =None,
-    destination : str | None = None
+    destination : str | None = None,
+    company_name : str | None = None,
 ):
     params = {} ## Query Parameters
+
     if origin: 
         params["origin"] = origin 
     if destination : 
         params["destination"] = destination
+    if company_name: 
+        params["company_name"] = company_name
     ## the mcp will call the backend 
     response = requests.get( ## to call FastAPI routes
         f"{BASE_URL}/flights/public/search", ##calls the api so it doen not access the database directly  
         params=params
     )
     return response.json()
-
 
 ###########################################################################################
 
@@ -89,10 +92,15 @@ def update_booking_email(
     )
 
     return response.json()
+#############################################################################################
 
-result = update_booking_email(
-    booking_id=17,
-    old_email="totallyfakeemail123@gmail.com",
-    new_email="your_real_email@gmail.com"
-)
-print(result)
+################################### canceling the booking ###################################
+
+if __name__ == "__main__":
+    result = flight_search(
+        origin="Algiers",
+        destination="Frankfurt",
+        company_name="Nike Algeria"
+    )
+
+    print(result)
