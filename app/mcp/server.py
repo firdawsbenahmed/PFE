@@ -107,13 +107,28 @@ def cancel_booking(
         }
     )
     return response.json()
+###################################################################################################
+
+################################ Pyment #######################################
+@mcp.tool()
+def pay_booking(
+    booking_id : int,
+    passenger_email : EmailStr
+) : 
+    response = requests.put(
+        f"{BASE_URL}/bookings/guest/{booking_id}/pay" , 
+        params={
+            "passenger_email" : passenger_email
+        }
+    )
+    return response.json()  
 
 
 ################################# testing ##############################################
 if __name__ == "__main__":
-    result = cancel_booking(
-        booking_id = 18,
-        passenger_email = "firdawsbenahmed20@gmail.com"
+    result = pay_booking(
+        booking_id = 12,
+        passenger_email = "firdawsbenahmed10@gmail.com"
     )
 
     print(result)

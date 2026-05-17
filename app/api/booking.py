@@ -226,7 +226,7 @@ def pay_booking( ## this is the simulation of payment later on when the contract
     if booking.payment_status == "paid" : 
         raise HTTPException(status_code=404 , detail="it is already paid")
     
-    booking.status = "paid"
+    booking.payment_status = "paid"
     db.commit()
     db.refresh(booking)
 
