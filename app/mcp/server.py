@@ -95,12 +95,25 @@ def update_booking_email(
 #############################################################################################
 
 ################################### canceling the booking ###################################
+@mcp.tool()
+def cancel_booking(
+    booking_id : int ,
+    passenger_email : EmailStr
+) : 
+    response = requests.put(
+        f"{BASE_URL}/bookings/guest/{booking_id}/cancel",
+        params={
+            "passenger_email" : passenger_email
+        }
+    )
+    return response.json()
 
+
+################################# testing ##############################################
 if __name__ == "__main__":
-    result = flight_search(
-        origin="Algiers",
-        destination="Frankfurt",
-        company_name="Nike Algeria"
+    result = cancel_booking(
+        booking_id = 18,
+        passenger_email = "firdawsbenahmed20@gmail.com"
     )
 
     print(result)
