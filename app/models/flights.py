@@ -10,3 +10,4 @@ class Flight(Base) :
     destination = Column(String , nullable=False)
     departure_time = Column(DateTime, nullable=False)
     arrival_time = Column(DateTime, nullable=False)
+    status = Column(String , nullable=False , default="scheduled")

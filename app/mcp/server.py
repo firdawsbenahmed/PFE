@@ -122,13 +122,24 @@ def pay_booking(
         }
     )
     return response.json()  
+####################################################################################3###
 
-
+############################# checking the availability ################################
+@mcp.tool()
+def check_seat_availability(
+    flight_id : int
+):
+    response = requests.get(
+        f"{BASE_URL}/flights/{flight_id}/available",
+        params={
+            "flight_id" : flight_id
+        }
+    )
+    return response.json()
 ################################# testing ##############################################
 if __name__ == "__main__":
-    result = pay_booking(
-        booking_id = 12,
-        passenger_email = "firdawsbenahmed10@gmail.com"
+    result = check_seat_availability(
+        flight_id = 2,
     )
 
     print(result)
