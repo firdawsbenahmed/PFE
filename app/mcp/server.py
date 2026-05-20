@@ -136,6 +136,19 @@ def check_seat_availability(
         }
     )
     return response.json()
+
+#######################################################################################
+############################## checking the flight status #############################
+
+@mcp.tool()
+def check_flight_status(
+    flight_id : int 
+) : 
+    response = requests.get(
+        f"{BASE_URL}/flights/{flight_id}/status"
+    )
+    return response.json()
+
 ################################# testing ##############################################
 if __name__ == "__main__":
     result = check_seat_availability(
