@@ -92,7 +92,21 @@ def public_search_flight(
         query = query.filter(Flight.destination == destination)
     return query.all()
 
-    
+@router.get("/{flight_id}/status")
+def getting_flight_status(
+    flight_id : int, 
+    db : Session = Depends(get_db)
+):
+    query = db.query(Flight).filter(
+        Flight.id == flight_id
+    ).first()
+    if not query : 
+        raise HTTPException(status_code=404 , detail = "Flight not found")
+    return {
+        "flight_number" : query.flight_number,
+        "status" : query.status
+    }
+
 @router.get("/{flight_id}", response_model=FlightResponse)
 def get_flight_by_id(
     flight_id : int ,
