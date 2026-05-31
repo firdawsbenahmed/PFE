@@ -14,26 +14,39 @@ def health_check():
 
 ######################## searching for flight  ####################################
 ## AI callable tool
-@mcp.tool() 
+@mcp.tool()
 def flight_search(
-    origin : str | None =None,
-    destination : str | None = None,
-    company_name : str | None = None,
+    origin: str | None = None,
+    destination: str | None = None,
+    company_name: str | None = None,
 ):
-    params = {} ## Query Parameters
+    params = {}
 
-    if origin: 
-        params["origin"] = origin 
-    if destination : 
+    if origin:
+        params["origin"] = origin
+
+    if destination:
         params["destination"] = destination
-    if company_name: 
+
+    if company_name:
         params["company_name"] = company_name
-    ## the mcp will call the backend 
-    response = requests.get( ## to call FastAPI routes
-        f"{BASE_URL}/flights/public/search", ##calls the api so it doen not access the database directly  
+
+    response = requests.get(
+        f"{BASE_URL}/flights/public/search",
         params=params
     )
-    return response.json()
+
+    print("STATUS:", response.status_code)
+    print("TEXT:", response.text)
+
+    try:
+        return response.json()
+    except Exception:
+        return {
+            "error": "Backend did not return valid JSON",
+            "status_code": response.status_code,
+            "raw_response": response.text
+        }
 
 ###########################################################################################
 
@@ -151,8 +164,4 @@ def check_flight_status(
 
 ################################# testing ##############################################
 if __name__ == "__main__":
-    result = check_seat_availability(
-        flight_id = 2,
-    )
-
-    print(result)
+    mcp.run(transport= "streamable-http", port= 8001)

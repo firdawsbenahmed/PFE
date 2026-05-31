@@ -66,30 +66,42 @@ def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_d
 
 ### nrml login process this login process is for the admin and the users added later by the admin so it a public login process 
 
-@router.post("/Login", response_model= TokenResponse)
-def Login(data: LoginRequest , db : Session =Depends(get_db)) : 
-     
-     ### check the user existance 
-     user = db.query(User).filter(User.email == data.email).first()
-    ## verifying the password 
-     password_correctness = verify_password(data.password , user.password_hash)
-      
-     if not user or not password_correctness : 
-        raise HTTPException(status_code=401 , detail="invalid credentials")
+@router.post("/Login", response_model=TokenResponse)
+def Login(data: LoginRequest, db: Session = Depends(get_db)):
 
-     token = create_access_token({
-     "sub" : str(user.id),
-     "company_id" : user.company_id,
-     "role" : user.role
+    # check user existence
+    user = db.query(User).filter(User.email == data.email).first()
 
-     })
-     return TokenResponse(
-          access_token = token,
-          company_id = user.company_id,
-          role=user.role,
-          name=user.name
-     )
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="invalid credentials"
+        )
 
+    # verify password
+    password_correctness = verify_password(
+        data.password,
+        user.password_hash
+    )
+
+    if not password_correctness:
+        raise HTTPException(
+            status_code=401,
+            detail="invalid credentials"
+        )
+
+    token = create_access_token({
+        "sub": str(user.id),
+        "company_id": user.company_id,
+        "role": user.role
+    })
+
+    return TokenResponse(
+        access_token=token,
+        company_id=user.company_id,
+        role=user.role,
+        name=user.name
+    )
 ## process of the admin creating the users 
 @router.post("/register-employee", response_model=UserResponse) 
 def register_employee(
