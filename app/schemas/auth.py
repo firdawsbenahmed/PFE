@@ -25,3 +25,18 @@ class TokenResponse(BaseModel):
     company_id: int
     role : str
     name : str
+
+class VerifyEmailRequest(BaseModel) : 
+    token : str 
+
+class ResendVerificationRequest(BaseModel): 
+    email : EmailStr
+
+class ChangePasswordRequest(BaseModel): 
+    current_password : str 
+    new_password : str
+class ForgetPasswordRequest(BaseModel): 
+    email : EmailStr
+class ResetPasswordRequest(BaseModel) : 
+    token : str 
+    new_password : str 

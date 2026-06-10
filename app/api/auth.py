@@ -17,7 +17,7 @@ router =APIRouter(prefix="/auth" , tags=["auth"])
 ## craeting the company and the admin at the same time cz the admin is the one who creates the company account 
 
 @router.post("/register-company", response_model= TokenResponse)
-async def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_db)): 
+def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_db)): 
      ## we check the existance of the email 
      email_exists = db.query(User).filter(User.email == data.email).first()
      if email_exists : 
@@ -62,7 +62,9 @@ async def register_comapny(data : RegisterCompanyRequest, db : Session = Depends
      db.add(verification_token)
      db.commit()
      
-     await send_verification_email (admin_user.email , token_value)
+     result =  send_verification_email (admin_user.email , token_value)
+     if not result["success"] : 
+          print(f"[WARNING] Verification rmsil failed")
 
      token = create_access_token({ 
         "sub" : str(admin_user.id), 
@@ -154,7 +156,9 @@ def verification_email(
 
      return{"message" : "email has been successfuly verified"}
 
-################
+################  resend the email ########## 
+
+
 
 
 
