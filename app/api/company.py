@@ -42,11 +42,11 @@ def Update_company(
     if not company : 
         raise HTTPException(status_code= 404 , detail="company not found")
     
-    if data.name is None : 
+    if data.name is not None : 
         company.name = data.name
-    if data.industry is None :
+    if data.industry is not None :
         company.industry = data.industry
-    if data.email is None : 
+    if data.email is not  None : 
         company.email = data.email
 
     db.commit()
