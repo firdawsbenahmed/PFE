@@ -10,4 +10,4 @@ from app.api.booking import router as booking_router
 
 app = FastAPI()
 
-app.include_router(booking_router)
+app.include_router(auth_router)

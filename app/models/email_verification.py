@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from app.core.database import Base
 
 class EmailVerificationToken(Base) : 
-    __tablename__ = "email_verification_token"
+    __tablename__ = "email_verification_tokens"
 
     id = Column(Integer , primary_key=True , index=True )
     user_id = Column(Integer , ForeignKey("users.id"), nullable=False)

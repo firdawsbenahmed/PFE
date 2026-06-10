@@ -62,7 +62,7 @@ def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_d
      db.add(verification_token)
      db.commit()
      
-     result =  send_verification_email (admin_user.email , token_value)
+     result =  send_verification_email(admin_user.email , token_value)
      if not result["success"] : 
           print(f"[WARNING] Verification rmsil failed")
 
