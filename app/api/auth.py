@@ -2,19 +2,22 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.models.user import User 
 from app.models.company import Company
+from app.models.email_verification import EmailVerificationToken
 from app.schemas.auth import TokenResponse, RegisterCompanyRequest,LoginRequest,RegisterEmployeeRequest
 from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token
 from app.core.deps import get_current_user
 from app.schemas.user import UserResponse
 from sqlalchemy.exc import IntegrityError
-
+from app.core.email import send_verification_email, password_resert_email
+import secrets
+from datetime import datetime , timedelta , timezone
 router =APIRouter(prefix="/auth" , tags=["auth"])
 
 ## craeting the company and the admin at the same time cz the admin is the one who creates the company account 
 
 @router.post("/register-company", response_model= TokenResponse)
-def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_db)): 
+async def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_db)): 
      ## we check the existance of the email 
      email_exists = db.query(User).filter(User.email == data.email).first()
      if email_exists : 
@@ -41,12 +44,25 @@ def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_d
           password_hash = hash_password(data.password),
           company_id = new_company.id,
           role = "admin", 
-          is_active = True
+          is_active = True , 
+          is_verified = False 
 
      )     
      db.add(admin_user)
      db.commit()
      db.refresh(admin_user)
+     ### hna ndirou email verification 
+     token_value = secrets.token_urlsafe(32)
+     verification_token = EmailVerificationToken(
+         user_id = admin_user.id,
+         token = token_value,
+         expires_at = datetime.now(timezone.utc) + timedelta(hours=24),
+         Used = False
+     )
+     db.add(verification_token)
+     db.commit()
+     
+     await send_verification_email (admin_user.email , token_value)
 
      token = create_access_token({ 
         "sub" : str(admin_user.id), 
@@ -89,6 +105,8 @@ def Login(data: LoginRequest, db: Session = Depends(get_db)):
             status_code=401,
             detail="invalid credentials"
         )
+    if not user.is_verified:
+           raise HTTPException(status_code=403, detail="Please verify your email first")
 
     token = create_access_token({
         "sub": str(user.id),
@@ -102,6 +120,47 @@ def Login(data: LoginRequest, db: Session = Depends(get_db)):
         role=user.role,
         name=user.name
     )
+
+########### email verification ######################
+@router.get("/verify-email")
+def verification_email(
+     token : str , 
+     db : Session = Depends(get_db)
+) : 
+     """
+     called when user clicks the link in thier email.
+     The token is passed as a query param : /auth/verify-email?token=abc123
+     """
+     record = db.query(EmailVerificationToken).filter(
+          EmailVerificationToken.token == token
+     ).first()
+
+     if not record : 
+          raise HTTPException(status_code=400 , detail="invalid verification token ")
+     if record.used : 
+          raise HTTPException(status_code=400 , detail="this token is already used")
+     if record.expires_at < datetime.now(timezone.utc) : 
+          raise HTTPException(status_code=  400 , detail="token has expired , please request a new one ")
+     
+     record.used = True
+
+     ### we need to verify the user 
+     user = db.query(User).filter(User.id == record.user_id).first()
+     if not user : 
+          raise HTTPException(status_code=404 , detail="the user not found")
+     
+     user.is_verified = True
+     db.commit()
+
+     return{"message" : "email has been successfuly verified"}
+
+################
+
+
+
+
+
+          
 ## process of the admin creating the users 
 @router.post("/register-employee", response_model=UserResponse) 
 def register_employee(
