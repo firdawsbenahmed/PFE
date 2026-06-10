@@ -203,10 +203,33 @@ def change_password(
 
      return {"message" : "password updated"} 
 
-###########
+########### forget the passwrd
+@router.post("forget-password")
+def forget_password(
+     data : ForgetPasswordRequest ,
+     db : Session = Depends(get_current_user),
+) : 
+     user = db.query(User).filter(
+          User.email == data.email
+     ).first()
 
+     if not user : 
+          return{"message" : "if this email exists a reset link has been sent"} 
+     ## we dont need to tell the user whether this email exists or not 
 
+     token_value = secrets.token_urlsafe(32)
+     reset_token = EmailVerificationToken(
+         user_id = user.id,
+         token = token_value,
+         expires_at = datetime.now(timezone.utc) + timedelta(hours=1),
+         Used = False
+     )
+     db.add(reset_token)
+     db.commit()
 
+     send_verification_email(user.email , token_value)
+
+     return{"message":"if this email exists a reset link has been sent"}
 
 
 
