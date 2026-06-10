@@ -187,6 +187,7 @@ def resend_verification(
      send_verification_email(user.email , token_value)
      return{"message":"if this email exist and unverified , a new link will be sent"}
 
+## user is loggedIn 
 @router.put("/change-password")
 def change_password(
      data : ChangePasswordRequest,
@@ -231,7 +232,36 @@ def forget_password(
 
      return{"message":"if this email exists a reset link has been sent"}
 
+############## reset the password 
+@router.post("/reset-password")
+def reset_password(
+     data : ResetPasswordRequest,
 
+     db: Session = Depends(get_db) , 
+) : 
+     record = db.query(EmailVerificationToken).filter(
+          EmailVerificationToken.token == data.token
+     )
+     if not record : 
+          raise HTTPException(status_code=400 , detail="invalid reset token")
+     
+     if record.used : 
+          raise HTTPException(status_code=400 , detail="this reset link is already used")
+
+     if record.expires_at < datetime.now(timezone.utc) : 
+          raise HTTPException(status_code=  400 , detail="token has expired , please request a new one ")
+     
+     user = db.query(User).filter(
+          User.id == record.user_id
+     ).first()
+     if not user : 
+          raise HTTPException(status_code=404 , detail="user not found")
+     
+     user.password_hash = hash_password(data.new_password)
+     db.commit()
+     record.used = True
+     db.commit()
+     return {"message": "Password reset successfully. You can now log in with your new password."}
 
 
 
@@ -262,6 +292,7 @@ def register_employee(
          email = data.email,
          password_hash =hash_password(data.password),
          role = data.role,
+         is_verified = True,
          is_active = True
     )
     db.add(new_user)
@@ -281,5 +312,6 @@ def get_me(
          "email":current_user.email,
          "role":current_user.role,
          "company_id": current_user.company_id,
-         "is_active" : current_user.is_active        
+         "is_active" : current_user.is_active,  
+         "is_verified" : current_user.is_verified   
      }
