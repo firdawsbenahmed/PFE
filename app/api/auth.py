@@ -57,7 +57,7 @@ def register_comapny(data : RegisterCompanyRequest, db : Session = Depends(get_d
          user_id = admin_user.id,
          token = token_value,
          expires_at = datetime.now(timezone.utc) + timedelta(hours=24),
-         Used = False
+         used = False
      )
      db.add(verification_token)
      db.commit()
@@ -164,7 +164,7 @@ def resend_verification(
 ):
      user = db.query(User).filter(
           User.email == data.email
-     )
+     ).first()
      if not user or not user.is_verified:
           return{"message" : "if this email exist and unverified , a new link has been sent"}
     # Invalidate any existing unused tokens
@@ -179,7 +179,7 @@ def resend_verification(
          user_id = user.id,
          token = token_value,
          expires_at = datetime.now(timezone.utc) + timedelta(hours=24),
-         Used = False
+         used = False
      )
      db.add(new_token)
      db.commit()
@@ -205,10 +205,10 @@ def change_password(
      return {"message" : "password updated"} 
 
 ########### forget the passwrd
-@router.post("forget-password")
+@router.post("/forget-password")
 def forget_password(
      data : ForgetPasswordRequest ,
-     db : Session = Depends(get_current_user),
+     db : Session = Depends(get_db),
 ) : 
      user = db.query(User).filter(
           User.email == data.email
@@ -223,12 +223,12 @@ def forget_password(
          user_id = user.id,
          token = token_value,
          expires_at = datetime.now(timezone.utc) + timedelta(hours=1),
-         Used = False
+         used = False
      )
      db.add(reset_token)
      db.commit()
 
-     send_verification_email(user.email , token_value)
+     password_resert_email(user.email , token_value)
 
      return{"message":"if this email exists a reset link has been sent"}
 
@@ -241,7 +241,7 @@ def reset_password(
 ) : 
      record = db.query(EmailVerificationToken).filter(
           EmailVerificationToken.token == data.token
-     )
+     ).first()
      if not record : 
           raise HTTPException(status_code=400 , detail="invalid reset token")
      
