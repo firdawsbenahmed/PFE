@@ -187,9 +187,31 @@ def resend_verification(
      send_verification_email(user.email , token_value)
      return{"message":"if this email exist and unverified , a new link will be sent"}
 
+@router.put("/change-password")
+def change_password(
+     data : ChangePasswordRequest,
+     db : Session = Depends(get_db),
+     current_user : User = Depends(get_current_user)
+) : 
+     if not verify_password(data.current_password , current_user.password_hash) : 
+          raise HTTPException(status_code=401 , detail="the current password is uncorrect")
+     if data.current_password == data.new_password : 
+          raise HTTPException(status_code=400 , detail= "the new password should not match the current password ")
+     
+     current_user.password_hash = hash_password(data.new_password)
+     db.commit()
+
+     return {"message" : "password updated"} 
+
+###########
 
 
-          
+
+
+
+
+
+
 ## process of the admin creating the users 
 @router.post("/register-employee", response_model=UserResponse) 
 def register_employee(
