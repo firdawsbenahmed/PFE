@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.user import User 
 from app.models.company import Company
 from app.models.email_verification import EmailVerificationToken
-from app.schemas.auth import TokenResponse, RegisterCompanyRequest,LoginRequest,RegisterEmployeeRequest
+from app.schemas.auth import TokenResponse, RegisterCompanyRequest,LoginRequest,RegisterEmployeeRequest, ResendVerificationRequest, ResetPasswordRequest, VerifyEmailRequest, ChangePasswordRequest, ForgetPasswordRequest
 from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token
 from app.core.deps import get_current_user
@@ -157,10 +157,35 @@ def verification_email(
      return{"message" : "email has been successfuly verified"}
 
 ################  resend the email ########## 
+@router.post("/resend-verification")
+def resend_verification(
+     data:ResendVerificationRequest , 
+     db : Session = Depends(get_db)
+):
+     user = db.query(User).filter(
+          User.email == data.email
+     )
+     if not user or not user.is_verified:
+          return{"message" : "if this email exist and unverified , a new link has been sent"}
+    # Invalidate any existing unused tokens
+     db.query(EmailVerificationToken).filter(
+          EmailVerificationToken.user_id == user.id,
+          EmailVerificationToken.used == False
+     ).update({"used" : True})
+     db.commit()
 
-
-
-
+     token_value = secrets.token_urlsafe(32)
+     new_token = EmailVerificationToken(
+         user_id = user.id,
+         token = token_value,
+         expires_at = datetime.now(timezone.utc) + timedelta(hours=24),
+         Used = False
+     )
+     db.add(new_token)
+     db.commit()
+     
+     send_verification_email(user.email , token_value)
+     return{"message":"if this email exist and unverified , a new link will be sent"}
 
 
 
