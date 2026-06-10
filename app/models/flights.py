@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String,ForeignKey,Integer,DateTime
 from app.core.database import Base
+from sqlalchemy.orm import relationship
 
 class Flight(Base) : 
     __tablename__ = "flights"
@@ -11,3 +12,4 @@ class Flight(Base) :
     departure_time = Column(DateTime, nullable=False)
     arrival_time = Column(DateTime, nullable=False)
     status = Column(String , nullable=False , default="scheduled")
+    classes = relationship("Flight_class", backref="flights")

@@ -7,7 +7,7 @@ class Flight_class(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     flight_id = Column(Integer, ForeignKey("flights.id"),nullable=False)
-    flight_class = Column(Enum("economy","buisness","first", name="flight_class_Enum"), nullable=False)
+    flight_class = Column(Enum("economy","business","first", name="flight_class_enum"), nullable=False)
     price = Column(Integer, nullable=False)
     total_seats = Column(Integer, nullable=False)
     available_seats = Column(Integer, nullable=False)

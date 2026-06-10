@@ -18,13 +18,14 @@ class FlightCreate(BaseModel):
 class FlightClassResponse(BaseModel): 
     id : int
     flight_id : int 
-    class_type : str
+    class_type : str = Field(alias="flight_class")
     price : int 
     total_seats : int 
     available_seats : int 
     
     class Config : 
         from_attributes = True 
+        populate_by_name = True
 
 class FlightResponse(BaseModel): 
     id : int 
@@ -34,7 +35,7 @@ class FlightResponse(BaseModel):
     destination : str 
     departure_time : datetime
     arrival_time : datetime 
-    classes : Optional[List[FlightClassCreate]] = [] 
+    classes : Optional[List[FlightClassResponse]] = [] 
 
     class Config : 
         from_attributes = True    

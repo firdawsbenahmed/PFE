@@ -23,7 +23,7 @@ def create_flight(
         origin = flight.origin,
         destination = flight.destination,
         departure_time =flight.departure_time,
-        arrival_time = flight.arrival_time
+        arrival_time = flight.arrival_time  
     )
     db.add(new_flight)
     db.flush()
@@ -36,7 +36,8 @@ def create_flight(
             total_seats = class_item.total_seats,
             available_seats = class_item.total_seats
         )
-    db.add(new_class)
+        db.add(new_class)
+
     db.commit()
     db.refresh(new_flight)
 
