@@ -65,7 +65,7 @@ def send_verification_email(
 
     try : 
         msg = EmailMessage()
-        msg["object"] = "verify your email - UNIFLOW"
+        msg["Subject"] = "verify your email - UNIFLOW"
         msg["from"] = sender_email
         msg["to"] = to_email
         msg.set_content(
@@ -107,7 +107,7 @@ def password_resert_email(
 
     try : 
         msg = EmailMessage()
-        msg["object"] = "Password Reset - UNIFLOW"
+        msg["Subject"] = "Password Reset - UNIFLOW"
         msg["from"] = sender_email
         msg["to"] = to_email
         msg.set_content(
