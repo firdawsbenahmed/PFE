@@ -1,14 +1,13 @@
 from fastapi import FastAPI
-from app.core.database import engine
-from app.api.company import router as company_router
-from app.api.product import router as product_router
-from app.api.store import router as store_router
-from app.api.inventory import router as inventory_router
-from app.api.auth import router as auth_router
-from app.api.flight import router as flight_router
-from app.api.booking import router as booking_router
-from app.api.admin import router as admin_router
-from app.api.account import router as account_router
+from backend.app.core.database import engine
+from backend.app.api.company import router as company_router
+from backend.app.api.product import router as product_router
+from backend.app.api.store import router as store_router
+from backend.app.api.inventory import router as inventory_router
+from backend.app.api.auth import router as auth_router
+from backend.app.api.flight import router as flight_router
+from backend.app.api.booking import router as booking_router
+from backend.app.api.admin import router as admin_router
 
 app = FastAPI()
 
@@ -16,7 +15,6 @@ app.include_router(auth_router)
 app.include_router(flight_router)
 app.include_router(booking_router)
 app.include_router(admin_router)
-app.include_router(account_router)
 app.include_router(company_router)
 app.include_router(product_router)
 app.include_router(store_router)
