@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Workflow, Check, AlertCircle, MailCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { verifyEmail, resendVerification } from "@/lib/api"
+import { verifyEmail, resendVerification, clearAuth } from "@/lib/api"
 
 function VerifyEmailContent() {
   const router = useRouter()
@@ -31,6 +31,9 @@ function VerifyEmailContent() {
     setMessage("")
     try {
       const res = await verifyEmail(token)
+      // Verifying an email is NOT a login. Drop any stale session left in this
+      // browser so the redirect to "/" doesn't auto-restore a previous account.
+      clearAuth()
       setStatus("success")
       setMessage(res?.message || "Your email has been verified.")
       // Send the user to the login page shortly after success.

@@ -401,6 +401,11 @@ export interface Store {
   manager_name: string | null
 }
 
+export interface ProductAttribute {
+  name: string
+  values: string[]
+}
+
 export interface Product {
   id: number
   name: string
@@ -408,6 +413,7 @@ export interface Product {
   price: number
   description: string | null
   company_id: number
+  attributes?: ProductAttribute[] | null
 }
 
 export interface InventoryItem {
@@ -458,6 +464,7 @@ export async function createProduct(data: {
   sku: string
   price: number
   description?: string | null
+  attributes?: ProductAttribute[] | null
 }) {
   return apiCall<Product>('/products/', {
     method: 'POST',

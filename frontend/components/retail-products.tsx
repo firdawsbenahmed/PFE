@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Package, Plus, AlertCircle, Loader, Tag } from "lucide-react"
+import { Package, Plus, AlertCircle, Loader, Tag, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getProducts, createProduct, type Product } from "@/lib/api"
 
@@ -18,6 +18,8 @@ export function RetailProductsView() {
     price: "",
     description: "",
   })
+  // Variant options, e.g. { name: "Color", valuesText: "Red, Blue" }. Values are comma-separated in the UI.
+  const [attrs, setAttrs] = useState<{ name: string; valuesText: string }[]>([])
 
   useEffect(() => {
     loadProducts()
@@ -44,13 +46,21 @@ export function RetailProductsView() {
     }
     setSaving(true)
     try {
+      const attributes = attrs
+        .map((a) => ({
+          name: a.name.trim(),
+          values: a.valuesText.split(",").map((v) => v.trim()).filter(Boolean),
+        }))
+        .filter((a) => a.name && a.values.length > 0)
       await createProduct({
         name: formData.name,
         sku: formData.sku,
         price: Number(formData.price) || 0,
         description: formData.description || null,
+        attributes: attributes.length ? attributes : null,
       })
       setFormData({ name: "", sku: "", price: "", description: "" })
+      setAttrs([])
       setShowForm(false)
       await loadProducts()
     } catch (err) {
@@ -136,6 +146,52 @@ export function RetailProductsView() {
               </div>
             </div>
 
+            {/* Variant options — colors, sizes, or any custom attribute */}
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="text-sm font-medium">Variant options</label>
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setAttrs((a) => [...a, { name: "Color", valuesText: "" }])} className="text-xs text-accent hover:underline">
+                    + Color
+                  </button>
+                  <button type="button" onClick={() => setAttrs((a) => [...a, { name: "Size", valuesText: "" }])} className="text-xs text-accent hover:underline">
+                    + Size
+                  </button>
+                  <button type="button" onClick={() => setAttrs((a) => [...a, { name: "", valuesText: "" }])} className="text-xs text-accent hover:underline">
+                    + Custom
+                  </button>
+                </div>
+              </div>
+              {attrs.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  Optional — add the colors, sizes, or any options this product comes in.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {attrs.map((a, i) => (
+                    <div key={i} className="grid grid-cols-[1fr_1.6fr_auto] items-center gap-2">
+                      <input
+                        value={a.name}
+                        onChange={(e) => { const n = [...attrs]; n[i] = { ...n[i], name: e.target.value }; setAttrs(n) }}
+                        placeholder="Color"
+                        className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20"
+                      />
+                      <input
+                        value={a.valuesText}
+                        onChange={(e) => { const n = [...attrs]; n[i] = { ...n[i], valuesText: e.target.value }; setAttrs(n) }}
+                        placeholder="Red, Blue, Black"
+                        className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20"
+                      />
+                      <button type="button" onClick={() => setAttrs(attrs.filter((_, idx) => idx !== i))} aria-label="Remove option">
+                        <X className="size-4 text-muted-foreground hover:text-destructive" />
+                      </button>
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted-foreground">Separate values with commas (e.g. Red, Blue, Black).</p>
+                </div>
+              )}
+            </div>
+
             {error && (
               <div className="flex items-start gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
                 <AlertCircle className="size-4 shrink-0 mt-0.5" />
@@ -178,6 +234,7 @@ export function RetailProductsView() {
                 <th className="px-4 py-3 text-left font-medium">Product</th>
                 <th className="px-4 py-3 text-left font-medium">SKU</th>
                 <th className="px-4 py-3 text-left font-medium">Price</th>
+                <th className="px-4 py-3 text-left font-medium">Options</th>
                 <th className="px-4 py-3 text-left font-medium">Description</th>
               </tr>
             </thead>
@@ -196,6 +253,22 @@ export function RetailProductsView() {
                     </span>
                   </td>
                   <td className="px-4 py-3">${p.price.toFixed(2)}</td>
+                  <td className="px-4 py-3">
+                    {p.attributes && p.attributes.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {p.attributes.map((a) => (
+                          <span
+                            key={a.name}
+                            className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/30 px-2 py-0.5 text-xs"
+                          >
+                            <span className="font-medium">{a.name}:</span> {a.values.join(", ")}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{p.description || "—"}</td>
                 </tr>
               ))}

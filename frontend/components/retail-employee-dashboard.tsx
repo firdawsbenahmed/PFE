@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { AccountSettingsView } from "@/components/account-settings"
 import { RetailEmployeeInventoryView } from "@/components/retail-employee-inventory"
 import { RetailAnalyticsView } from "@/components/retail-analytics"
+import { getUserId } from "@/lib/api"
 
 type RetailEmployeeTab = "inventory" | "analytics" | "settings"
 
@@ -104,7 +105,7 @@ export function RetailEmployeeDashboard({
 
         <div className="p-6">
           {activeTab === "inventory" && <RetailEmployeeInventoryView />}
-          {activeTab === "analytics" && <RetailAnalyticsView />}
+          {activeTab === "analytics" && <RetailAnalyticsView managerId={getUserId() ?? -1} />}
           {activeTab === "settings" && <AccountSettingsView onLogout={onLogout} />}
         </div>
       </main>
