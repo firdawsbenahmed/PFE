@@ -1,0 +1,6 @@
+TO DO FOR Tommorow :
+add an email validation system (very important) ==> feature/email-verification
+Password reset flow 
+changing the email by the admin for the user cz no need to create a new employee if the old employee has felt awe diasable the account in case if a new one came we only change the email and the the password or just the email 
+TO DO for later : 
+finish the oother endpoint function comapny , product , store  and the delete and update user endpoint

@@ -1,0 +1,15 @@
+from sqlalchemy import Column, Integer, String, DateTime,Enum
+from sqlalchemy.sql import func
+from app.core.database import Base
+
+class Company(Base):
+    __tablename__ = "companies"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    industry = Column(Enum('retail', 'aviation', name='Industry_Enum'),default="aviation",nullable=False)
+    email = Column(String, nullable=False, unique=True)
+    status = Column(String, nullable=False, default="active")
+    ## per-company key so an MCP / AI app scopes to this brand only (multi-tenant)
+    api_key = Column(String, unique=True, index=True, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
