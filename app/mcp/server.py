@@ -162,6 +162,81 @@ def check_flight_status(
     )
     return response.json()
 
+###################################################################################################
+############################### STORE / PRODUCT / INVENTORY (public, no auth) #####################
+###################################################################################################
+
+######################### "do you sell X?" -> search products #####################################
+@mcp.tool()
+def search_products(
+    query: str,
+    company_name: str | None = None,
+):
+    params = {"query": query}
+    if company_name:
+        params["company_name"] = company_name
+
+    response = requests.get(f"{BASE_URL}/products/public/search", params=params)
+    return response.json()
+
+
+########################## product details (price, description) ###################################
+@mcp.tool()
+def get_product_details(
+    product_id: int,
+):
+    response = requests.get(f"{BASE_URL}/products/public/{product_id}")
+    return response.json()
+
+
+###################### "is X in stock near me?" -> availability ###################################
+@mcp.tool()
+def check_product_availability(
+    product_name: str,
+    location: str | None = None,
+    company_name: str | None = None,
+):
+    params = {"product_name": product_name}
+    if location:
+        params["location"] = location
+    if company_name:
+        params["company_name"] = company_name
+
+    response = requests.get(f"{BASE_URL}/inventory/public/availability", params=params)
+    return response.json()
+
+
+############################## "where are your shops?" -> stores ##################################
+@mcp.tool()
+def list_stores(
+    location: str | None = None,
+    company_name: str | None = None,
+):
+    params = {}
+    if location:
+        params["location"] = location
+    if company_name:
+        params["company_name"] = company_name
+
+    response = requests.get(f"{BASE_URL}/stores/public/search", params=params)
+    return response.json()
+
+
+######################## "which store has X?" -> stores holding a product #########################
+@mcp.tool()
+def find_stores_with_product(
+    product_name: str,
+    company_name: str | None = None,
+):
+    params = {"product_name": product_name}
+    if company_name:
+        params["company_name"] = company_name
+
+    ## same availability endpoint, no location filter -> every store that has it in stock
+    response = requests.get(f"{BASE_URL}/inventory/public/availability", params=params)
+    return response.json()
+
+
 ################################# testing ##############################################
 if __name__ == "__main__":
     mcp.run(transport= "streamable-http", port= 8001)
