@@ -2,10 +2,11 @@ from app.models.company import Company
 from app.models.product import Product
 from app.models.Store import Store
 from app.models.inventory import Inventory
-from app.schemas.inventory import CreateInventory, ResponseInventory, UpdateInventoryQuantity
+from app.schemas.inventory import CreateInventory, ResponseInventory, UpdateInventoryQuantity, ProductAvailability
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List
-from sqlalchemy.orm import Session 
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.user import User
 from app.core.deps import get_current_user
@@ -113,6 +114,53 @@ def delete_inventory(
     db.commit()
 
     return {"Inventory record has been deleted successfully !!"}
+
+
+########## PUBLIC (no auth) — for the ChatGPT/MCP customer tools ##########
+## powers both "is X in stock near me?" and "which store has X?"
+## - filter by product_name  -> availability of that product
+## - filter by location too  -> availability near the user
+## - only returns rows that are actually in stock (quantity > 0)
+@router.get("/public/availability", response_model=List[ProductAvailability])
+def public_check_availability(
+    product_name : str | None = Query(default=None),
+    location : str | None = Query(default=None),
+    company_name : str | None = Query(default=None),
+    db : Session = Depends(get_db),
+):
+    q = (
+        db.query(Inventory, Product, Store)
+        .join(Product, Inventory.product_id == Product.id)
+        .join(Store, Inventory.store_id == Store.id)
+        .filter(Inventory.quantity > 0)
+    )
+
+    if company_name :
+        q = q.join(Company, Inventory.company_id == Company.id)
+        q = q.filter(Company.name.ilike(f"%{company_name}%"))
+
+    if product_name :
+        q = q.filter(or_(
+            Product.name.ilike(f"%{product_name}%"),
+            Product.sku.ilike(f"%{product_name}%"),
+        ))
+
+    if location :
+        q = q.filter(Store.location.ilike(f"%{location}%"))
+
+    return [
+        ProductAvailability(
+            product_id = product.id,
+            product_name = product.name,
+            sku = product.sku,
+            price = product.price,
+            store_id = store.id,
+            store_name = store.name,
+            store_location = store.location,
+            quantity = inventory.quantity,
+        )
+        for inventory, product, store in q.all()
+    ]
 
 
 
