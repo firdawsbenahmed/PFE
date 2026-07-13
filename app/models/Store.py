@@ -12,6 +12,9 @@ class Store(Base):
     name = Column(String, nullable=False)
     location = Column(String ,nullable=False)
 
+    ## responsible employee for this store (nullable — a store can be unassigned)
+    manager_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
     created_at= Column(DateTime(timezone=True), server_default=func.now())
     __table_arg__ = (
         UniqueConstraint("company_id","name", name="Unique_store_name_per_company" )
