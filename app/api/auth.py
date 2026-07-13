@@ -304,14 +304,18 @@ def register_employee(
 ## now we want to get the current user informations 
 @router.get("/me")
 def get_me(
-     current_user : User =Depends(get_current_user)
-) : 
+     current_user : User =Depends(get_current_user),
+     db : Session = Depends(get_db)
+) :
+     company = db.query(Company).filter(Company.id == current_user.company_id).first()
      return {
          "id" : current_user.id,
          "name": current_user.name,
          "email":current_user.email,
          "role":current_user.role,
          "company_id": current_user.company_id,
-         "is_active" : current_user.is_active,  
-         "is_verified" : current_user.is_verified   
+         "company_name": company.name if company else "",
+         "industry": company.industry if company else "aviation",
+         "is_active" : current_user.is_active,
+         "is_verified" : current_user.is_verified
      }
