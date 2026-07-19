@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String , DateTime,ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime,ForeignKey
 from app.core.database import Base
 from sqlalchemy.sql import func
 class Booking(Base): 
@@ -10,6 +10,7 @@ class Booking(Base):
     passenger_name = Column(String, nullable=False)
     passenger_email = Column(String, nullable=False)
     status = Column(String ,default="reserved", nullable=False)
+    price = Column(Float, nullable=True)
     payment_status = Column(String, nullable=False , default="unpaid")
     payment_link = Column(String, nullable=True)
     email_status = Column(String,nullable=False, default="not_sent")
