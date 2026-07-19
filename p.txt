@@ -1,0 +1,18 @@
+slide one presentation of the architecture 
+=============================================================
+aviation  
+1. representing the tables and their content + schemas
+2. aviation endpoints 
+3. mcp server + tools 
+4. live test ( creating an account + test on an existing account + checking th employee side + test a booking secanrio for tools ) 
+=================================================================
+retail 
+1. representing the tables and their content + schemas
+2. aviation endpoints 
+3. mcp server + tools 
+4. live test ( creating an account + test on an existing account + checking th employee side + test a booking secanrio for tools )
+==================================================================
+comparision between this version that actully works and the improved one for production 
+limitaions for productions and future plans 
+
+
