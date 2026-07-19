@@ -61,11 +61,12 @@ def flight_search(
 
 @mcp.tool()
 def reserve_ticket(
-    flight_id : int ,
-    flight_class_id : int , 
-    passenger_name : str,
-    passenger_email : EmailStr
-) : 
+    flight_id: int,
+    flight_class_id: int,
+    passenger_name: str,
+    passenger_email: str,
+):
+    """Reserve a flight ticket for a guest passenger."""
     payload = {
     "flight_id" : flight_id ,
     "flight_class_id" : flight_class_id , 
@@ -74,7 +75,8 @@ def reserve_ticket(
     }
     response = requests.post(
         f"{BASE_URL}/bookings/guest",
-        json=payload
+        json=payload,
+        headers=_headers(),
     )
     return response.json()
 
