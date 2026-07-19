@@ -20,6 +20,7 @@ class BookingResponse (BaseModel):
     status : str 
     payment_status : str
     payment_link : str | None = None
+    price : float | None = None
 
     class Config : 
         from_attributes = True 
